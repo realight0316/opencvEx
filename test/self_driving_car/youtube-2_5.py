@@ -21,14 +21,13 @@ fit_result, l_fit_result, r_fit_result, L_lane, R_lane = [], [], [], [], []
 
 
 # Define the codec and create VideoWriter object
-# fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use the lower case
-# out = cv2.VideoWriter('output.mp4', fourcc, 20.0, ( 960, 540 ))
+fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use the lower case
+out = cv2.VideoWriter('output.mp4', fourcc, 20.0, ( 960, 540 ))
 
 def grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
 def canny(img, low_threshold, high_threshold):
-    """Applies the Canny transform"""
     return cv2.Canny(img, low_threshold, high_threshold)
 
 def gaussian_blur(img, kernel_size):
@@ -208,7 +207,9 @@ def detect_lanes_img(img):
 
     # Set ROI
     vertices = np.array(
-        [[(240,height-40),(width/2-50, height/2+60), (width/2+135, height/2+60), (width-110,height-40)]],
+        # [[(240,height-40),(width/2-50, height/2+60), (width/2+135, height/2+60), (width-110,height-40)]],
+        # dtype=np.int32)
+        [[(220, height), (width / 2 - 25, height / 2 + 25), (width / 2 + 73, height / 2 + 25), (width - 60, height)]],
         dtype=np.int32)
     ROI_img = region_of_interest(img, vertices)
     cv2.imshow('test1', ROI_img)
@@ -223,8 +224,16 @@ def detect_lanes_img(img):
     canny_img = canny(blur_img, 70, 210)
     # to except contours of ROI image
     vertices2 = np.array(
-        [[(240,height-40),(width/2-50, height/2+60), (width/2+135, height/2+60), (width-110,height-40)]],
+        # [[(240,height-40),(width/2-50, height/2+60), (width/2+135, height/2+60), (width-110,height-40)]],
+        # dtype=np.int32)
+        [[(220, height-40), (width / 2 - 25, height / 2 + 25), (width / 2 + 73, height / 2 + 25), (width - 60, height-40)]],
         dtype=np.int32)
+
+    blackcover = np.array(
+         [[(300,height-40),(width/2-30, height/2+60), (width/2+100, height/2+60), (width-170,height-40)]],
+         dtype=np.int32)
+    cv2.fillPoly(canny_img, [blackcover], (0,0,0))
+
     canny_img = region_of_interest(canny_img, vertices2)
     cv2.imshow('test2', canny_img)
 
@@ -279,7 +288,7 @@ while (cap.isOpened()):
     
     cv2.imshow('result', result)
 
-    # out.write(frame)
+    out.write(result)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
